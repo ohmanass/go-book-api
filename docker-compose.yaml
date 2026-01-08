@@ -1,18 +1,30 @@
-version: '3.9'
+version: "3.9"
+
+networks:
+  app-network:
+    driver: bridge
 
 services:
   db:
-    image: postgres:15
-    container_name: books_db
-    restart: always
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: booksdb
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
+     image: postgres:15
+     volumes:
+       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+       - db_data:/var/lib/postgresql/data
+     ports:
+       - "5434:5432"
+     environment:
+       POSTGRES_USER: admin
+       POSTGRES_PASSWORD: admin
+       POSTGRES_DB: booksdb
+     healthcheck:
+       test: ["CMD-SHELL", "pg_isready -U admin -d booksdb"]
+       interval: 1s
+       timeout: 5s
+       retries: 10
+     networks:
+       - app-network
 
 volumes:
+  cache:
+    driver: local
   db_data:
