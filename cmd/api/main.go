@@ -27,8 +27,26 @@ func main() {
 
 	// Open database connection
 	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		log.Fatal(err)
+
+	test := db.QueryRow("SELECT * FROM books LIMIT 1;")
+	fmt.Println(test)
+
+	var id, title, author string
+	var year sql.NullInt32
+
+// Get one book
+	erra := db.QueryRow("SELECT id, title, author, year FROM books LIMIT 1").Scan(&id, &title, &author, &year)
+	if erra != nil {
+		if erra == sql.ErrNoRows {
+			fmt.Println("No books found")
+		} else {
+			log.Fatal(erra)
+		}
+	} else {
+		fmt.Println("Book:", id, title, author, year)
+	}
+	if erra != nil {
+		log.Fatal(erra)
 	}
 	defer db.Close() // Close connection on exit
 
